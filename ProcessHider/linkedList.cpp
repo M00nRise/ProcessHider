@@ -3,66 +3,55 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <time.h>
+#include <vector>
 
+using namespace std;
 
-PNODE listHead = NULL;
-int itemNums = 0;
+vector<processData> mainVec;
+processData* findNodeinList(int x);
+
 void addData(int newData)
 {
-	PNODE pNewNode =(PNODE) malloc(sizeof(NODE));
-	pNewNode->data = newData;
-	pNewNode->next = listHead;
-	pNewNode->isTouched = true;
-	pNewNode->isOnline = false;
-	pNewNode->time_Created = clock();
-	listHead = pNewNode;
-	itemNums++;
+	processData p;
+	p.data= newData;
+	p.isTouched = true;
+	p.isOnline = false;
+	p.time_Created = clock();
+	mainVec.push_back(p);
 }
 
 void setOnline(int x)
 {
-	PNODE node=findNodeinList(x);
+	processData* node=findNodeinList(x);
 	if (node != NULL)
 		node->isOnline = true;
 }
 
 bool getOnline(int x)
 {
-	PNODE node = findNodeinList(x);
+	processData* node = findNodeinList(x);
 	if (node != NULL)
 		return node->isOnline;
 	return false;
 }
-PNODE findNodeinList(int x)
+processData* findNodeinList(int x)
 {
-	PNODE lookup = listHead;
-	while (lookup != NULL)
+	for (unsigned int i = 0; i < mainVec.size(); i++)
 	{
-		if (lookup->data == x)
-		{
-			return lookup;
-		}
-		else
-		{
-			lookup = lookup->next;
-		}
+		if (mainVec[i].data == x)
+			return &mainVec[i];
 	}
 	return NULL;
 }
 
 bool isInPidList(int x)
 {
-	PNODE lookup = listHead;
-	while (lookup!=NULL)
+	for (unsigned int i = 0; i < mainVec.size(); i++)
 	{
-		if (lookup->data == x)
+		if (mainVec[i].data == x)
 		{
-			lookup->isTouched = true;
+			mainVec[i].isTouched = true;
 			return true;
-		}
-		else
-		{
-			lookup = lookup->next;
 		}
 	}
 	return false;
@@ -71,68 +60,45 @@ bool isInPidList(int x)
 
 double timeFromCreation(int x)
 {
-	PNODE lookup = listHead;
-	while (lookup != NULL)
+	for (unsigned int i = 0; i < mainVec.size();i++)
 	{
-		if (lookup->data == x)
+		if (mainVec[i].data==x)
 		{
 			time_t curr_clk = clock();
-			double res = (curr_clk - lookup->time_Created) / (double)CLOCKS_PER_SEC;
+			double res = (curr_clk - mainVec[i].time_Created) / (double)CLOCKS_PER_SEC;
 			return res;
-		}
-		else
-		{
-			lookup = lookup->next;
 		}
 	}
 	return 9999;
 }
 void deleteEntry(int x)
 {
-	PNODE prev=NULL,lookup = listHead;
-	if (listHead == NULL) //nolist
-		return;
-	
-	if (listHead->data == x)
+	for (unsigned int i = 0; i < mainVec.size(); i++)
 	{
-		lookup = listHead;
-		listHead = lookup->next;
-		itemNums--;
-		free(lookup);
-	}
-	if (listHead == NULL)
-	{
-		return;
-	}
-	prev = listHead;
-	lookup = listHead->next;
-	while (lookup != NULL)
-	{
-		PNODE nextNode = lookup->next;
-		if (lookup->data == x)
+		if (mainVec[i].data == x)
 		{
-			prev->next = lookup->next;
-			itemNums--;
-			free(lookup);
+			mainVec.erase(mainVec.begin() + i);
+			i = 0;
+			continue;
 		}
-		else
-		{
-			prev = lookup;
-		}
-		lookup = nextNode;
 	}
 }
 
 void updateList()
 {
-	PNODE next, curr = listHead;
-	while (curr != NULL)
+	vector<int> deleteLocs;
+	for (unsigned int i = 0; i < mainVec.size(); i++)
 	{
-		next = curr->next;
-		if (!curr->isTouched)
-			deleteEntry(curr->data);
+		if (!mainVec[i].isTouched)
+		{
+			deleteLocs.push_back(i);
+		}
 		else
-			curr->isTouched = false;
-		curr = next;
+			mainVec[i].isTouched = false;
+	}
+	reverse(mainVec.begin(), mainVec.end());
+	for (unsigned int i = 0; i < deleteLocs.size(); i++)
+	{
+		mainVec.erase(mainVec.begin() + deleteLocs[i]);
 	}
 }
