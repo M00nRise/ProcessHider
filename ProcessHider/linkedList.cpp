@@ -69,7 +69,7 @@ double timeFromCreation(int x)
 			return res;
 		}
 	}
-	return 9999;
+	return -1; //doesn't matter, as long as it's bigger than a few seconds
 }
 void deleteEntry(int x)
 {
@@ -96,7 +96,7 @@ void updateList()
 		else
 			mainVec[i].isTouched = false;
 	}
-	reverse(mainVec.begin(), mainVec.end());
+	reverse(mainVec.begin(), mainVec.end()); //first delete further elements, so indexes won't change
 	for (unsigned int i = 0; i < deleteLocs.size(); i++)
 	{
 		mainVec.erase(mainVec.begin() + deleteLocs[i]);
