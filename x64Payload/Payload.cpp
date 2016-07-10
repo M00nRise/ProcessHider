@@ -30,6 +30,21 @@ PNtQueryFunc RealNTQueryFunc,OrigAddress;
 
 
 HANDLE hMutex;
+extern "C" __declspec(dllexport) wchar_t* WStringFunc()
+{
+	InitializeDLL();
+	return NULL;
+
+}
+
+extern "C" __declspec(dllexport) char* StringFunc()
+{
+	InitializeDLL();
+	return NULL;
+}
+extern "C" __declspec(dllexport) void VoidFunc(){
+	InitializeDLL();
+}
 
 /*void PrintToFile(const char* s) //just for debugging purposes
 {
@@ -199,6 +214,7 @@ int buildProcNameList(const TCHAR *optarg, BOOL includeSelf, TCHAR ***outStrBuff
 		i++;
 		pwc = wcstok_s(NULL, delim, &context);
 	}
+	free(str_buffer);
 	return i;
 
 }
@@ -206,6 +222,7 @@ int buildProcNameList(const TCHAR *optarg, BOOL includeSelf, TCHAR ***outStrBuff
 void InitializeDLL()
 {
 	NtHookEngineInit();
+	hMutex = CreateMutex(0, TRUE, NULL);
 	TCHAR pIDsbuff[MAX_LINE], procNameBuff[MAX_LINE];// , hookEngLoc[MAX_PATH];
 	FILE *fp;
 	fopen_s(&fp, INFO_TRANSFER_FILE, "r");
@@ -232,9 +249,13 @@ void InitializeDLL()
 	/*if (RealNTQueryFunc == NULL)
 		PrintToFile("Can't get Real Func!");
 	PrintToFile("Post-Hook");*/
+	ReleaseMutex(hMutex);
 }
 void UnhookDLL()
 {
 	UnhookFunction((ULONG_PTR)OrigAddress);
-
+	free(hiddenPIDsList);
+	for (int i = 0; i < procNameNum; i++)
+		free(hiddenProcessNames[i]);
+	free(hiddenProcessNames);
 }
