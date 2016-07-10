@@ -62,8 +62,6 @@
   <ItemGroup>
     <None Include="..\Debug\x64Payload.dll" />
     <None Include="..\Debug\x86Payload.dll" />
-    <None Include="..\Debug\EasyHook32.dll" />
-    <None Include="..\Debug\EasyHook64.dll" />
     <None Include="..\BuildOutput\x64Hider.exe" />
   </ItemGroup>
 </Project>

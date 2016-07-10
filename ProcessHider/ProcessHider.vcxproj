@@ -22,6 +22,8 @@
     <ProjectGuid>{43237BF6-7361-4449-ACDE-A2A9180D0DB3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ProcessHider</RootNamespace>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -166,12 +168,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\BuildOutput\x64Hider.exe" />
-    <None Include="..\Debug\EasyHook32.dll" />
-    <None Include="..\Debug\EasyHook64.dll" />
     <None Include="..\Debug\x64Payload.dll" />
     <None Include="..\Debug\x86Payload.dll" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   </ImportGroup>
 </Project>

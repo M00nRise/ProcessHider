@@ -27,7 +27,7 @@
     <ClInclude Include="Payload.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="easyhook.h">
+    <ClInclude Include="..\NtHookEngine\NtHookEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,5 +41,8 @@
     <ClCompile Include="Payload.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\NtHookEngine\NtHookEnginex64.lib" />
   </ItemGroup>
 </Project>

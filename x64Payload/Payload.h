@@ -14,15 +14,13 @@
 
 void InitializeDLL();
 
-void UpdateThreadList();
-void AddThreadToACL(ULONG threadID);
-void RemoveThreadFromACL(ULONG threadID);
 extern HANDLE hMutex;
+extern bool isUp;
+extern "C" __declspec(dllexport) wchar_t* WStringFunc();
 
-
-void PrintToFile(const char* s);
-void GetThisProcessThreads(ULONG *target, int* numOfThreads);
-
+extern "C" __declspec(dllexport) char* StringFunc();
+extern "C" __declspec(dllexport) void VoidFunc();
+//void PrintToFile(const char* s);
 void UnhookDLL();
 typedef NTSTATUS(__stdcall *PNtQueryFunc)(SYSTEM_INFORMATION_CLASS, PVOID, ULONG, PULONG);
 typedef struct _SYSTEM_PROCESS_INFO

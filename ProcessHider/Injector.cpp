@@ -39,7 +39,6 @@ BOOL InjectorFunc(int procID, TCHAR *DLL_Address_local)
 		printf("Error: there was no bytes written to the process's address space.\n");
 		return FALSE;
 	}
-
 	/*
 	* Inject our DLL into the process's address space.
 	*/

@@ -24,7 +24,10 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\x64Payload\easyhook.h">
+    <ClInclude Include="..\NtHookEngine\NtHookEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\x64Payload\Payload.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,5 +41,8 @@
     <ClCompile Include="..\x64Payload\Payload.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\NtHookEngine\NtHookEngineWin32.lib" />
   </ItemGroup>
 </Project>
