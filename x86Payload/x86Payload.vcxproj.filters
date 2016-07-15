@@ -24,10 +24,13 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\NtHookEngine\NtHookEngine.h">
+    <ClInclude Include="..\x64Payload\Payload.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\x64Payload\Payload.h">
+    <ClInclude Include="..\NtHookEngine\Sources\distorm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NtHookEngine\Sources\NtHookEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,8 +44,11 @@
     <ClCompile Include="..\x64Payload\Payload.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\NtHookEngine\Sources\NtHookEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\NtHookEngine\NtHookEngineWin32.lib" />
+    <Library Include="..\NtHookEngine\Sources\distorm_x86.lib" />
   </ItemGroup>
 </Project>
