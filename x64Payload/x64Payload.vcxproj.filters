@@ -27,8 +27,11 @@
     <ClInclude Include="Payload.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\NtHookEngine\NtHookEngine.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\NtHookEngine\Sources\distorm.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NtHookEngine\Sources\NtHookEngine.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -41,8 +44,13 @@
     <ClCompile Include="Payload.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\NtHookEngine\Sources\NtHookEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\NtHookEngine\NtHookEnginex64.lib" />
+    <Library Include="..\NtHookEngine\Sources\distorm_x64.lib">
+      <Filter>Source Files</Filter>
+    </Library>
   </ItemGroup>
 </Project>

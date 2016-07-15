@@ -145,12 +145,14 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\NtHookEngine\NtHookEngine.h" />
+    <ClInclude Include="..\NtHookEngine\Sources\distorm.h" />
+    <ClInclude Include="..\NtHookEngine\Sources\NtHookEngine.h" />
     <ClInclude Include="Payload.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\NtHookEngine\Sources\NtHookEngine.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
@@ -174,7 +176,7 @@
     <ClCompile Include="Payload.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\NtHookEngine\NtHookEnginex64.lib" />
+    <Library Include="..\NtHookEngine\Sources\distorm_x64.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
