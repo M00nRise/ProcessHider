@@ -196,7 +196,6 @@ void WriteInfoToFile(int *hiddenPIDsList, int PIDsNum, TCHAR **hiddenProcessName
 {
 	//format -	first line - pIDs seperated by commas
 	//			second line - process names seperated by commas
-	//			third line - location of the HookEngine dll
 	TCHAR proc_name_buffer[MAX_PROC_NAME_LEN];
 	FILE* fp; fopen_s(&fp,INFO_TRANSFER_FILE, "w");
 	int i;
@@ -221,11 +220,6 @@ void WriteInfoToFile(int *hiddenPIDsList, int PIDsNum, TCHAR **hiddenProcessName
 		fprintf(fp, "%ws", proc_name_buffer);
 	}
 	fprintf(fp, "\n");
-	TCHAR dllLocBuffer[MAX_PATH];
-	GetModuleFileNameEx(GetCurrentProcess(), NULL, dllLocBuffer, MAX_PATH);
-	getFolderFromPath(dllLocBuffer);
-	wcscat_s(dllLocBuffer, MAX_PATH, HookEngine);
-	fprintf(fp, "%ws\n", dllLocBuffer);
 	fclose(fp);
 }
 

@@ -8,10 +8,10 @@
 #define ID_BUFFER_SIZE 10
 #define x64LauncherFile L"x64Hider.exe"
 
-LPCWSTR x64filesList[] = {x64LauncherFile, L"EasyHook64.dll", L"x64Payload.dll" },
-x86filesList[] = { L"EasyHook32.dll", L"x86Payload.dll" };
-int x64resourceIDint[] = { IDR_RCDATA1, IDR_RCDATA2, IDR_RCDATA4 }, x86resourceIDint[] = { IDR_RCDATA3, IDR_RCDATA5 };
-int x86ResNum=2,x64ResNum=3;
+LPCWSTR x64filesList[] = {x64LauncherFile,  L"x64Payload.dll" },
+x86filesList[] = {  L"x86Payload.dll" };
+int x64resourceIDint[] = { IDR_RCDATA1, IDR_RCDATA4 }, x86resourceIDint[] = {  IDR_RCDATA5 };
+int x86ResNum=1,x64ResNum=2;
 
 
 BOOL IsElevated() {
