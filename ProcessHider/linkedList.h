@@ -9,14 +9,13 @@
 
 //#define DATA_TYPE int
 
-typedef struct _NODE
+typedef struct _procData
 {
 	int data;
 	time_t time_Created;
 	bool isTouched;
 	bool isOnline;
-	struct _NODE *next;
-} NODE, *PNODE;
+} processData;
 bool getOnline(int x);
 void setOnline(int x);
 
@@ -26,7 +25,5 @@ bool isInPidList(int x);
 void deleteEntry(int x);
 void updateList();
 double timeFromCreation(int x);
-PNODE findNodeinList(int x);
-extern int itemNums;
 
 #endif
