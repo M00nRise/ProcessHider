@@ -145,20 +145,32 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PreBuildEvent>
+      <Command>powershell -ExecutionPolicy bypass  -Command "&amp; '$(SolutionDir)Build-DLLs.ps1'"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Common\DLLs_hex.cpp" />
     <ClCompile Include="..\ProcessHider\Daemon.cpp" />
+    <ClCompile Include="..\ProcessHider\GetProcAddressR.cpp" />
     <ClCompile Include="..\ProcessHider\Injector.cpp" />
     <ClCompile Include="..\ProcessHider\linkedList.cpp" />
+    <ClCompile Include="..\ProcessHider\LoadLibraryR.cpp" />
     <ClCompile Include="..\ProcessHider\Preparations.cpp" />
     <ClCompile Include="..\ProcessHider\XGetopt.cpp" />
     <ClCompile Include="x64 Launcher.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Common\ArgumentsPassing.h" />
+    <ClInclude Include="..\Common\DLLs_hex.h" />
     <ClInclude Include="..\ProcessHider\Daemon.h" />
+    <ClInclude Include="..\ProcessHider\defs.h" />
+    <ClInclude Include="..\ProcessHider\GetProcAddressR.h" />
     <ClInclude Include="..\ProcessHider\Injector.h" />
     <ClInclude Include="..\ProcessHider\linkedList.h" />
+    <ClInclude Include="..\ProcessHider\LoadLibraryR.h" />
     <ClInclude Include="..\ProcessHider\Preparations.h" />
+    <ClInclude Include="..\ProcessHider\ReflectiveDLLInjection.h" />
     <ClInclude Include="..\ProcessHider\XGetopt.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

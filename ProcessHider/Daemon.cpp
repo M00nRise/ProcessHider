@@ -2,7 +2,17 @@
 #include "Injector.h"
 
 
+BOOL isProcess64Bit(HANDLE hProcess)
+{
+#ifndef _WIN64 
+	return FALSE;
+#else
+	BOOL res;
+	IsWow64Process(hProcess, &res);
+	return !res;
+#endif // 
 
+}
 
 BOOL wstrcmp_ignorecase(LPCWSTR a, LPCWSTR b) //easier to implement than use existing functions
 {
@@ -34,6 +44,7 @@ BOOL isInFrobProcList(LPCWSTR proc)
 
 void reactToProcess(DWORD pid, LPWSTR name)
 {
+	
 	if (!isInPidList(pid))
 	{
 		addData(pid);
@@ -46,7 +57,7 @@ void reactToProcess(DWORD pid, LPWSTR name)
 		if ((!getOnline(pid)) && timeFromCreation(pid) >= TIME_TO_INJECT_SEC) //if you inject immediately, you might crash some processes
 		{
 			printf("Alert! %ws is online! pid=%d\n", name, pid);
-			InjectorFunc(pid, PayloadName);
+			InjectorFunc(pid,isProcess64Bit(OpenProcess(PROCESS_ALL_ACCESS,FALSE,pid)));
 			setOnline(pid);
 		}
 	}
@@ -56,7 +67,6 @@ void reactToProcess(DWORD pid, LPWSTR name)
 
 void startDaemonScan()
 {
-	PVOID buffer = VirtualAlloc(NULL, 1024 * 1024, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
 	while (1)
 	{
@@ -73,7 +83,9 @@ void startDaemonScan()
 			HANDLE Handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, TRUE, curr_pid);
 			GetModuleBaseName(Handle, NULL, strBuffer, MAX_PATH);
 			if ((Handle) && isInFrobProcList(strBuffer))
+			{
 				reactToProcess(curr_pid, strBuffer);
+			}
 			CloseHandle(Handle);
 		}
 		updateList();

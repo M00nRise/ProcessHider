@@ -4,6 +4,5 @@
 #include <Windows.h>
 #include <stdio.h>
 #include "Preparations.h"
-BOOL InjectorFunc(int procID, TCHAR *DLL_Address);
-
+BOOL InjectorFunc(DWORD dwProcessId, BOOL isTarget64Bit);
 #endif

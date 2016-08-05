@@ -1,10 +1,11 @@
 #include "Preparations.h"
 #include "Daemon.h"
-int *hiddenPIDsList;
-TCHAR **hiddenProcessNames;
-int PIDsNum=0, procNameNum=0;
+#include "defs.h"
+
 
 vector<wstring> frobiddenProcessesList;
+ArgStruct argsToDLL;
+
 
 void initFrobProcList()
 {
@@ -57,20 +58,23 @@ void getFolderFromPath(TCHAR *target)
 	return;
 }
 
-int buildPIDsList(const TCHAR *optarg, BOOL includeSelf, int **intBuffer)
+int buildPIDsList(const TCHAR *optarg, BOOL includeSelf)
 {
 	//returned value - number of PIDs in list
 	TCHAR str_buffer[MAX_COMMAND], *context, *pwc, *delim = L",./";
 	int sizeOfIntBuffer = sizeof(int)*(int)(1 + ceil(wcslen(optarg) / (float)2));
-	*intBuffer = (int *)malloc((sizeOfIntBuffer));  //maximum ints is ceil(strlen(str)/2) is each pid is a digit, plus one for self
 	int i = 0, sizeOfStrBuffer = sizeof(TCHAR)*(MAX_COMMAND);
 	wcscpy_s(str_buffer, MAX_COMMAND, optarg);
 	if (wcslen(optarg) == 0 && !includeSelf)
 		return 0;
 	if (includeSelf)
 	{
-		(*intBuffer)[i] = (int)GetCurrentProcessId();
 		i++;
+		if (argsToDLL.pIDsNum <= MAX_PIDS_TO_SEND)
+		{
+			argsToDLL.pIDs[argsToDLL.pIDsNum] = (int)GetCurrentProcessId();
+			argsToDLL.pIDsNum++;
+		}
 	}
 	pwc = wcstok_s(str_buffer, delim, &context);
 	while (pwc != NULL)
@@ -78,8 +82,12 @@ int buildPIDsList(const TCHAR *optarg, BOOL includeSelf, int **intBuffer)
 		int x_buffer = _wtoi(pwc);
 		if (x_buffer != 0)
 		{
-			(*intBuffer)[i] = x_buffer;
 			i++;
+			if (argsToDLL.pIDsNum < MAX_PIDS_TO_SEND)
+			{
+				argsToDLL.pIDs[argsToDLL.pIDsNum] = x_buffer;
+				argsToDLL.pIDsNum++;
+			}
 		}
 		pwc = wcstok_s(NULL, delim, &context);
 	}
@@ -87,13 +95,12 @@ int buildPIDsList(const TCHAR *optarg, BOOL includeSelf, int **intBuffer)
 
 }
 
-int buildProcNameList(const TCHAR *optarg, BOOL includeSelf, TCHAR ***outStrBuffer)
+int buildProcNameList(const TCHAR *optarg, BOOL includeSelf)
 {
 	TCHAR *str_buffer, *context, *pwc, *delim = L",";
 	int i = 0, sizeOfStrBuffer = (int)sizeof(TCHAR)*(int)(wcslen(optarg) + 1);
 	if (wcslen(optarg) == 0)
 		return 0;
-	*outStrBuffer = (TCHAR **)malloc(sizeof(TCHAR*)*wcslen(optarg));
 	str_buffer = (TCHAR *)malloc(sizeOfStrBuffer);
 	wcscpy_s(str_buffer, (wcslen(optarg) + 1), optarg);
 	
@@ -103,16 +110,22 @@ int buildProcNameList(const TCHAR *optarg, BOOL includeSelf, TCHAR ***outStrBuff
 		GetModuleBaseName(GetCurrentProcess(), NULL, tmpSelfBuffer, sizeof(tmpSelfBuffer));
 		int SizeOfStr = (int)sizeof(TCHAR)*(int)(1 + wcslen(tmpSelfBuffer));
 		TCHAR *xx = (TCHAR *)malloc(SizeOfStr);
-		(*outStrBuffer)[i] = xx;
-		wcscpy_s((*outStrBuffer)[i], (1 + wcslen(tmpSelfBuffer)), tmpSelfBuffer);
 		i++;
+		if (argsToDLL.procNamesLength <= MAX_PROC_NAMES_LINE_LEN-wcslen(tmpSelfBuffer) - 1)
+		{
+			wcscpy_s(argsToDLL.procNames, MAX_PROC_NAMES_LINE_LEN, tmpSelfBuffer);
+			argsToDLL.procNamesLength += wcslen(tmpSelfBuffer) + 1;
+		}
+	}
+	if (argsToDLL.procNamesLength <= (MAX_PROC_NAMES_LINE_LEN-wcslen(optarg)-1))
+	{
+		wcscat_s(argsToDLL.procNames, MAX_PROC_NAMES_LINE_LEN, optarg);
+		argsToDLL.procNamesLength += wcslen(optarg) + 1;
 	}
 	pwc = wcstok_s(str_buffer, delim, &context);
 	while (pwc != NULL)
 	{
 		int SizeOfStr = (int)sizeof(TCHAR)*(int)(1 + wcslen(pwc));
-		(*outStrBuffer)[i] = (TCHAR *)malloc(SizeOfStr);
-		wcscpy_s((*outStrBuffer)[i], (1 + wcslen(pwc)), pwc);
 		i++;
 		pwc = wcstok_s(NULL, delim, &context);
 	}
@@ -139,7 +152,7 @@ BOOL BuildHiddenProcessesLists(int argc, _TCHAR* argv[])
 			else
 			{
 				isParameter_i_active = true;
-				PIDsNum = buildPIDsList(optarg, TRUE, &hiddenPIDsList);
+				int PIDsNum = buildPIDsList(optarg, TRUE);
 				if (PIDsNum == 0)
 				{
 					printf("Error using -i option!\n");
@@ -156,7 +169,7 @@ BOOL BuildHiddenProcessesLists(int argc, _TCHAR* argv[])
 			else
 			{
 				isParameter_n_active = true;
-				procNameNum = buildProcNameList(optarg, FALSE, &hiddenProcessNames);
+				int procNameNum = buildProcNameList(optarg, FALSE);
 				if (procNameNum == 0)
 				{
 					printf("Error using -n option!\n");
@@ -186,48 +199,15 @@ BOOL BuildHiddenProcessesLists(int argc, _TCHAR* argv[])
 	}
 	if (!isParameter_i_active)
 	{
-		PIDsNum = buildPIDsList(L"", TRUE, &hiddenPIDsList);
+		buildPIDsList(L"", TRUE);
 	}
 	return TRUE;
 }
 
 
-void WriteInfoToFile(int *hiddenPIDsList, int PIDsNum, TCHAR **hiddenProcessNames, int procNameNum)
-{
-	//format -	first line - pIDs seperated by commas
-	//			second line - process names seperated by commas
-	TCHAR proc_name_buffer[MAX_PROC_NAME_LEN];
-	FILE* fp; fopen_s(&fp,INFO_TRANSFER_FILE, "w");
-	int i;
-	if (PIDsNum > 0)
-	{
-		for (i = 0; i < PIDsNum - 1; i++)
-		{
-			fprintf(fp, "%d,", hiddenPIDsList[i]);
-		}
-		fprintf(fp, "%d", hiddenPIDsList[i]);
-	}
-	fprintf(fp, "\n");
-	if (procNameNum>0)
-	{
-
-		for (i = 0; i < procNameNum - 1; i++)
-		{
-			wcscpy_s(proc_name_buffer, MAX_PROC_NAME_LEN, hiddenProcessNames[i]);
-			fprintf(fp, "%ws,", proc_name_buffer);
-		}
-		wcscpy_s(proc_name_buffer, MAX_PROC_NAME_LEN, hiddenProcessNames[i]);
-		fprintf(fp, "%ws", proc_name_buffer);
-	}
-	fprintf(fp, "\n");
-	fclose(fp);
-}
 
 
 BOOL PrepareContents(int argc, TCHAR * argv[])
 {
-	if (!BuildHiddenProcessesLists(argc, argv))
-		return FALSE;
-	WriteInfoToFile(hiddenPIDsList, PIDsNum, hiddenProcessNames, procNameNum);
-	return TRUE;
+	return BuildHiddenProcessesLists(argc, argv);
 }

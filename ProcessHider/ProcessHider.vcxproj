@@ -128,6 +128,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -148,18 +152,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Common\DLLs_hex.cpp" />
     <ClCompile Include="Daemon.cpp" />
+    <ClCompile Include="GetProcAddressR.cpp" />
     <ClCompile Include="HiderMain.cpp" />
     <ClCompile Include="Injector.cpp" />
     <ClCompile Include="linkedList.cpp" />
+    <ClCompile Include="LoadLibraryR.cpp" />
     <ClCompile Include="Preparations.cpp" />
     <ClCompile Include="XGetopt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Common\ArgumentsPassing.h" />
+    <ClInclude Include="..\Common\DLLs_hex.h" />
     <ClInclude Include="Daemon.h" />
+    <ClInclude Include="defs.h" />
+    <ClInclude Include="GetProcAddressR.h" />
     <ClInclude Include="Injector.h" />
     <ClInclude Include="linkedList.h" />
+    <ClInclude Include="LoadLibraryR.h" />
     <ClInclude Include="Preparations.h" />
+    <ClInclude Include="ReflectiveDLLInjection.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="XGetopt.h" />
   </ItemGroup>
@@ -168,8 +181,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\BuildOutput\x64Hider.exe" />
-    <None Include="..\Debug\x64Payload.dll" />
-    <None Include="..\Debug\x86Payload.dll" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

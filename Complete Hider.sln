@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProcessHider", "ProcessHider\ProcessHider.vcxproj", "{43237BF6-7361-4449-ACDE-A2A9180D0DB3}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -11,6 +11,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProcessHider", "ProcessHide
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "x64 Launcher", "x64 Launcher\x64 Launcher.vcxproj", "{D88F1D1D-92D0-4D3F-8D7F-BA6595EBD402}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8CAB413B-32E4-4D5F-82B4-D6BE7D77BCE1} = {8CAB413B-32E4-4D5F-82B4-D6BE7D77BCE1}
+		{2A839F5D-1F54-47D3-857A-106143116756} = {2A839F5D-1F54-47D3-857A-106143116756}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "x86Payload", "x86Payload\x86Payload.vcxproj", "{2A839F5D-1F54-47D3-857A-106143116756}"
 EndProject

@@ -33,6 +33,15 @@
     <ClCompile Include="Preparations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GetProcAddressR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadLibraryR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\DLLs_hex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Daemon.h">
@@ -53,6 +62,24 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GetProcAddressR.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadLibraryR.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectiveDLLInjection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\ArgumentsPassing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\DLLs_hex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ProcessHider.rc">
@@ -60,8 +87,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Debug\x64Payload.dll" />
-    <None Include="..\Debug\x86Payload.dll" />
     <None Include="..\BuildOutput\x64Hider.exe" />
   </ItemGroup>
 </Project>
