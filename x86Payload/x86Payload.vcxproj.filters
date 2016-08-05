@@ -56,22 +56,18 @@
     <ClCompile Include="..\x64Payload\Payload.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-<<<<<<< HEAD
     <ClCompile Include="..\NtHookEngine\src\NtHookEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\x64Payload\ReflectiveLoader.cpp">
-=======
+	      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\NtHookEngine\Sources\NtHookEngine.cpp">
->>>>>>> 844967763dc1d4335f1df850b2dd96f5f96f4d4a
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <Library Include="..\NtHookEngine\src\distorm_x86.lib" />
-=======
     <Library Include="..\NtHookEngine\Sources\distorm_x86.lib" />
->>>>>>> 844967763dc1d4335f1df850b2dd96f5f96f4d4a
   </ItemGroup>
 </Project>
