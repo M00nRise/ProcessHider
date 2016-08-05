@@ -83,14 +83,12 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <ClInclude Include="..\Common\ArgumentsPassing.h" />
     <ClInclude Include="..\NtHookEngine\NtHookEngine.h" />
     <ClInclude Include="..\NtHookEngine\src\distorm.h" />
-=======
+
     <ClInclude Include="..\NtHookEngine\Sources\distorm.h" />
     <ClInclude Include="..\NtHookEngine\Sources\NtHookEngine.h" />
->>>>>>> 844967763dc1d4335f1df850b2dd96f5f96f4d4a
     <ClInclude Include="..\x64Payload\Payload.h" />
     <ClInclude Include="..\x64Payload\ReflectiveDLLInjection.h" />
     <ClInclude Include="..\x64Payload\ReflectiveLoader.h" />
@@ -98,11 +96,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <ClCompile Include="..\NtHookEngine\src\NtHookEngine.cpp" />
-=======
     <ClCompile Include="..\NtHookEngine\Sources\NtHookEngine.cpp" />
->>>>>>> 844967763dc1d4335f1df850b2dd96f5f96f4d4a
     <ClCompile Include="..\x64Payload\dllmain.cpp" />
     <ClCompile Include="..\x64Payload\Payload.cpp" />
     <ClCompile Include="..\x64Payload\ReflectiveLoader.cpp" />
@@ -112,11 +107,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <Library Include="..\NtHookEngine\src\distorm_x86.lib" />
-=======
     <Library Include="..\NtHookEngine\Sources\distorm_x86.lib" />
->>>>>>> 844967763dc1d4335f1df850b2dd96f5f96f4d4a
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
