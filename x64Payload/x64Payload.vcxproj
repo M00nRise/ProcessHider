@@ -145,9 +145,14 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <ClInclude Include="..\Common\ArgumentsPassing.h" />
     <ClInclude Include="..\NtHookEngine\NtHookEngine.h" />
     <ClInclude Include="..\NtHookEngine\src\distorm.h" />
+=======
+    <ClInclude Include="..\NtHookEngine\Sources\distorm.h" />
+    <ClInclude Include="..\NtHookEngine\Sources\NtHookEngine.h" />
+>>>>>>> 844967763dc1d4335f1df850b2dd96f5f96f4d4a
     <ClInclude Include="Payload.h" />
     <ClInclude Include="ReflectiveDLLInjection.h" />
     <ClInclude Include="ReflectiveLoader.h" />
@@ -155,7 +160,11 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <ClCompile Include="..\NtHookEngine\src\NtHookEngine.cpp" />
+=======
+    <ClCompile Include="..\NtHookEngine\Sources\NtHookEngine.cpp" />
+>>>>>>> 844967763dc1d4335f1df850b2dd96f5f96f4d4a
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
@@ -180,7 +189,11 @@
     <ClCompile Include="Payload.cpp" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <Library Include="..\NtHookEngine\src\distorm_x64.lib" />
+=======
+    <Library Include="..\NtHookEngine\Sources\distorm_x64.lib" />
+>>>>>>> 844967763dc1d4335f1df850b2dd96f5f96f4d4a
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
