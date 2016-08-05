@@ -1,0 +1,63 @@
+﻿Merge branch 'master' of https://github.com/M00nRise/ProcessHider
+
+# Conflicts:
+#	BuildOutput/x64Hider.exe
+#	BuildOutput/x64Hider.iobj
+#	BuildOutput/x64Hider.ipdb
+#	BuildOutput/x64Payload.dll
+#	BuildOutput/x64Payload.exp
+#	BuildOutput/x64Payload.iobj
+#	BuildOutput/x64Payload.ipdb
+#	BuildOutput/x64Payload.lib
+#	BuildOutput/x86Payload.dll
+#	BuildOutput/x86Payload.exp
+#	BuildOutput/x86Payload.iobj
+#	BuildOutput/x86Payload.ipdb
+#	BuildOutput/x86Payload.lib
+#	MainFile/ProcessHider.exe
+#	MainFile/ProcessHider.iobj
+#	MainFile/ProcessHider.ipdb
+#	README.md
+#	x64Payload/x64Payload.vcxproj
+#	x64Payload/x64Payload.vcxproj.filters
+#	x86Payload/x86Payload.vcxproj
+#	x86Payload/x86Payload.vcxproj.filters
+#
+# It looks like you may be committing a merge.
+# If this is not correct, please remove the file
+#	.git/MERGE_HEAD
+# and try again.
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Your branch and 'origin/master' have diverged,
+# and have 1 and 3 different commits each, respectively.
+#   (use "git pull" to merge the remote branch into yours)
+#
+# All conflicts fixed but you are still merging.
+#
+# Changes to be committed:
+#	modified:   Build-PS-Scripts.ps1
+#	modified:   Complete Hider.sdf
+#	new file:   NtHookEngine/Sources/NtHookEngine.cpp
+#	new file:   NtHookEngine/Sources/NtHookEngine.h
+#	new file:   NtHookEngine/Sources/NtHookEngine.rc
+#	new file:   NtHookEngine/Sources/distorm.h
+#	new file:   NtHookEngine/Sources/distorm_x64.lib
+#	new file:   NtHookEngine/Sources/distorm_x86.lib
+#	new file:   NtHookEngine/Sources/resource.h
+#	new file:   NtHookEngine/Sources/stdafx.cpp
+#	new file:   NtHookEngine/Sources/stdafx.h
+#	new file:   PowerShell/Output/ReflectiveDLLInj.ps1
+#	modified:   PowerShell/Output/fullScript.ps1
+#	modified:   PowerShell/daemon-integration.ps1
+#	modified:   ProcessHider/ProcessHider.aps
+#	modified:   x64Payload/x64Payload.vcxproj
+#	modified:   x64Payload/x64Payload.vcxproj.filters
+#	modified:   x86Payload/x86Payload.vcxproj
+#	modified:   x86Payload/x86Payload.vcxproj.filters
+#
+
+Changed to reflective injector
