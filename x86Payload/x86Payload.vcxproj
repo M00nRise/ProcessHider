@@ -84,7 +84,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Common\ArgumentsPassing.h" />
-    <ClInclude Include="..\NtHookEngine\NtHookEngine.h" />
     <ClInclude Include="..\NtHookEngine\src\distorm.h" />
     <ClInclude Include="..\NtHookEngine\Sources\distorm.h" />
     <ClInclude Include="..\NtHookEngine\Sources\NtHookEngine.h" />

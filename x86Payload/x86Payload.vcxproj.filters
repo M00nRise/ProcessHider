@@ -60,7 +60,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\x64Payload\ReflectiveLoader.cpp">
-	      <Filter>Source Files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\NtHookEngine\Sources\NtHookEngine.cpp">
       <Filter>Source Files</Filter>

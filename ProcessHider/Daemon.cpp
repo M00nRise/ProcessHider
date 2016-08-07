@@ -4,6 +4,7 @@
 
 BOOL isProcess64Bit(HANDLE hProcess)
 {
+	
 #ifndef _WIN64 
 	return FALSE;
 #else
@@ -12,6 +13,11 @@ BOOL isProcess64Bit(HANDLE hProcess)
 	return !res;
 #endif // 
 
+/*	BOOL res;
+	IsWow64Process(GetCurrentProcess(), &res);
+	if (!res) return FALSE;
+	IsWow64Process(hProcess, &res);
+	return !res;*/
 }
 
 BOOL wstrcmp_ignorecase(LPCWSTR a, LPCWSTR b) //easier to implement than use existing functions
@@ -33,6 +39,7 @@ BOOL wstrcmp_ignorecase(LPCWSTR a, LPCWSTR b) //easier to implement than use exi
 
 BOOL isInFrobProcList(LPCWSTR proc)
 {
+	if (proc == NULL) return FALSE;
 	UINT i;
 	for (i = 0; i < frobiddenProcessesList.size(); i++)
 	{
@@ -67,10 +74,29 @@ void reactToProcess(DWORD pid, LPWSTR name)
 
 void startDaemonScan()
 {
+	PNtQueryFunc NtQuerySystemInformation = (PNtQueryFunc)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtQuerySystemInformation");
 
 	while (1)
 	{
-		DWORD procIDsBuffer[MAX_PROCESSES];
+
+		PSYSTEM_PROCESS_INFORMATION pspi = NULL;
+		ULONG info_length = 0;
+		NTSTATUS result = NtQuerySystemInformation(SystemProcessInformation, NULL, 0, &info_length);
+		pspi = (PSYSTEM_PROCESS_INFORMATION)malloc(info_length);
+		result = NtQuerySystemInformation(SystemProcessInformation, pspi, info_length, &info_length);
+		if (result <0) continue;
+		PSYSTEM_PROCESS_INFO pCurrent = NULL;
+		PSYSTEM_PROCESS_INFO pNext = (PSYSTEM_PROCESS_INFO)pspi;
+
+		do
+		{
+			pCurrent = pNext;
+			pNext = (PSYSTEM_PROCESS_INFO)((PUCHAR)pCurrent + pCurrent->NextEntryOffset);
+			if (isInFrobProcList(pCurrent->ImageName.Buffer))
+				reactToProcess((DWORD) pCurrent->ProcessId, pCurrent->ImageName.Buffer);
+		} while (pCurrent->NextEntryOffset != 0);
+		free(pspi);
+		/*DWORD procIDsBuffer[MAX_PROCESSES];
 		DWORD size_returned;
 
 		EnumProcesses(procIDsBuffer, sizeof(procIDsBuffer), &size_returned);
@@ -87,7 +113,11 @@ void startDaemonScan()
 				reactToProcess(curr_pid, strBuffer);
 			}
 			CloseHandle(Handle);
-		}
+		}*/
+
+
+
+
 		updateList();
 	}
 }
