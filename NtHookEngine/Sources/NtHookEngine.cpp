@@ -39,7 +39,7 @@ UINT CurrentBridgeBufferSize = 0; // This number is incremented as
 
 
 
-extern "C" void NtHookEngineInit()
+void NtHookEngineInit()
 {
 	pBridgeBuffer = (BYTE *)VirtualAlloc(NULL, MAX_HOOKS * (JUMP_WORST * 3),
 		MEM_COMMIT, PAGE_EXECUTE_READWRITE);
@@ -228,7 +228,6 @@ VOID *CreateBridge(ULONG_PTR Function, const UINT JumpSize)
 // Hooks a function
 //
 
-extern "C" __declspec(dllexport)
 BOOL __cdecl HookFunction(ULONG_PTR OriginalFunction, ULONG_PTR NewFunction)
 {
 	//
@@ -270,7 +269,7 @@ BOOL __cdecl HookFunction(ULONG_PTR OriginalFunction, ULONG_PTR NewFunction)
 // Unhooks a function
 //
 
-extern "C" __declspec(dllexport)
+
 VOID __cdecl UnhookFunction(ULONG_PTR Function)
 {
 	//
@@ -296,7 +295,7 @@ VOID __cdecl UnhookFunction(ULONG_PTR Function)
 // Get the bridge to call instead of the original function from hook
 //
 
-extern "C" __declspec(dllexport)
+
 ULONG_PTR __cdecl GetOriginalFunction(ULONG_PTR Hook)
 {
 	if (NumberOfHooks == 0)

@@ -39,9 +39,6 @@
     <ClInclude Include="..\x64Payload\ReflectiveLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\NtHookEngine\src\distorm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Common\ArgumentsPassing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -56,9 +53,6 @@
     <ClCompile Include="..\x64Payload\Payload.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\NtHookEngine\src\NtHookEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\x64Payload\ReflectiveLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -67,7 +61,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\NtHookEngine\src\distorm_x86.lib" />
     <Library Include="..\NtHookEngine\Sources\distorm_x86.lib" />
   </ItemGroup>
 </Project>

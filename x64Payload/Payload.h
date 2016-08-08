@@ -14,6 +14,8 @@
 
 //#define DEBUG_MODE
 
+
+#define INFO_TRANSFER_FILE  "C:\\Program Files\\Internet Explorer\\mdsint.isf"
 void InitializeDLL(pArgStruct args);
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved);
 extern HANDLE hMutex;
