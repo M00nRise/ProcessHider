@@ -39,9 +39,6 @@
     <ClCompile Include="..\ProcessHider\LoadLibraryR.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\DLLs_hex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ProcessHider\Daemon.h">

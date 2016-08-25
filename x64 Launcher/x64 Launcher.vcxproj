@@ -150,7 +150,6 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Common\DLLs_hex.cpp" />
     <ClCompile Include="..\ProcessHider\Daemon.cpp" />
     <ClCompile Include="..\ProcessHider\GetProcAddressR.cpp" />
     <ClCompile Include="..\ProcessHider\Injector.cpp" />

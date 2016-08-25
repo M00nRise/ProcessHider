@@ -13,5 +13,10 @@ typedef struct _arguments_struct
 	TCHAR procNames[MAX_PROC_NAMES_LINE_LEN]= L"\0";
 } ArgStruct,*pArgStruct;
 
+#define mappingName L"ProcMap"
+#define numOfMappingItems 5
+#define mappingSize  ((numOfMappingItems) * (sizeof(DWORD)))
+#define MutexName L"ProcMutex"
+
 #endif // !ARGUMENTS_PASSING_H
 

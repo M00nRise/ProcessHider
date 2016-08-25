@@ -11,7 +11,7 @@
 #include "linkedList.h"
 #include "XGetopt.h"
 #include "defs.h"
-void LaunchDaemon();
+void LaunchDaemon(BOOL InjectALL);
 
 
 typedef NTSTATUS(__stdcall *PNtQueryFunc)(SYSTEM_INFORMATION_CLASS, PVOID, ULONG, PULONG);

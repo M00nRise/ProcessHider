@@ -3,7 +3,8 @@
 #include <tchar.h>
 #include "resource.h"
 #include "Daemon.h"
-#include "Preparations.h"
+#include "Preparations.h" 
+#include "..\Common\DLLs_hex.h"
 #define MAX_COMMANDLINE_LEN 1000
 #define ID_BUFFER_SIZE 10
 #define x64LauncherFile L"x64Hider.exe"
@@ -12,7 +13,38 @@ LPCWSTR x64filesList[] = { x64LauncherFile };
 int x64resourceIDint[] = { IDR_RCDATA1 }; //dont care about x86, can't be called
 int x64ResNum = 1;
 
+void getFolderFromPath(TCHAR *target);
+void getSelfFolder(TCHAR *target, int num_tchars);
 
+//Get the folder of the exe
+void getSelfFolder(TCHAR *target, int num_tchars)
+{
+	GetModuleFileNameEx(GetCurrentProcess(), NULL, target, num_tchars);
+	getFolderFromPath(target);
+}
+
+//Extract the folder's name  (including the trailing \) from a file's path
+void getFolderFromPath(TCHAR *target)
+{
+	TCHAR *x;
+	TCHAR buffer[MAX_PATH] = L"\0";
+	TCHAR *pwc1 = wcstok_s(target, L"\\/", &x), *pwc2 = L"";
+	while (pwc1 != NULL)
+	{
+
+		wcscat_s(buffer, MAX_PATH, pwc2);
+		if (wcslen(pwc2) != 0)
+			wcscat_s(buffer, MAX_PATH, L"\\");
+		pwc2 = pwc1;
+		pwc1 = wcstok_s(NULL, L"\\/", &x);
+	}
+	target[0] = L'\0';
+	wcscat_s(target, MAX_PATH, buffer);
+	return;
+}
+
+
+//Check if this process is in elevated mode, because most threats require elevation to deal with
 BOOL IsElevated() {
 	BOOL fRet = FALSE;
 	HANDLE hToken = NULL;
@@ -33,10 +65,67 @@ BOOL IsElevated() {
 BOOL isSystem64BitWow()
 {
 	BOOL res;
-	IsWow64Process(GetCurrentProcess(), &res);
+	IsWow64Process(GetCurrentProcess(), &res); //this code shall be compiled to 32-bit. If the process is WoW64 - The system is 64 bit 
 	return res;
 } 
-int CreateProcessLine(TCHAR *command_line,bool newConsole)
+
+
+
+// If we use 64-bit version, we need to copy the DLLs to the new process' memory to avoid disk writes
+int WriteDLLsToProcess(PROCESS_INFORMATION pi)
+{
+	DWORD newPID = pi.dwProcessId;
+	HANDLE hMutex = CreateMutexEx(NULL, MutexName, 0, SYNCHRONIZE);
+	//Allocate and write
+	LPVOID x64PayloadRemoteAddr = VirtualAllocEx(pi.hProcess, NULL, x64PayloadSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	if (x64PayloadRemoteAddr == NULL) ERROR_PRINT("Couldn't allocate memory for x64 Payload!\n");
+	WriteProcessMemory(pi.hProcess, x64PayloadRemoteAddr, x64PayloadByteArr, x64PayloadSize, NULL);
+	LPVOID x86PayloadRemoteAddr = VirtualAllocEx(pi.hProcess, NULL, x86PayloadSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	if (x86PayloadRemoteAddr == NULL) ERROR_PRINT("Couldn't allocate memory for x86 Payload!\n");
+	WriteProcessMemory(pi.hProcess, x86PayloadRemoteAddr, x86PayloadByteArr, x86PayloadSize, NULL);
+	//structure - x64Addr,x64Size,x86Addr,x86Size,flag (will be explained later)
+	DWORD PayloadsAddresses[mappingSize] = { (DWORD)x64PayloadRemoteAddr,x64PayloadSize,(DWORD)x86PayloadRemoteAddr,x86PayloadSize ,1};
+	HANDLE hMapFile = CreateFileMapping( //use file mapping to write remote addresses to process
+		INVALID_HANDLE_VALUE,    // use paging file
+		NULL,                    // default security
+		PAGE_READWRITE,          // read/write access
+		0,                       // maximum object size (high-order DWORD)
+		mappingSize,                // maximum object size (low-order DWORD)
+		mappingName);                 // name of mapping object
+	if (hMapFile == NULL)
+	{
+		_tprintf(TEXT("Could not create file mapping object (%d).\n"),
+			GetLastError());
+		return FALSE;
+	}
+	DWORD *pBuf = (DWORD *)MapViewOfFile(hMapFile,FILE_MAP_ALL_ACCESS,0,0,mappingSize);
+	if (pBuf == NULL)
+	{
+		_tprintf(TEXT("Could not map view of file (%d).\n"),
+			GetLastError());
+		CloseHandle(hMapFile);
+		return FALSE;
+	}
+	CopyMemory((PVOID)pBuf, PayloadsAddresses, mappingSize);
+	ResumeThread(pi.hThread);
+
+	//How to get ACK from the remote process - if the flag from the array changes to zero - the process finished the job and we can clean
+	int signalCheck = 1;
+	while (signalCheck)
+	{
+		HANDLE hCheck=OpenMutex(SYNCHRONIZE, FALSE, MutexName);
+		signalCheck = pBuf[numOfMappingItems-1];
+		ReleaseMutex(hCheck);
+		CloseHandle(hCheck);
+	}
+	UnmapViewOfFile(pBuf);
+	CloseHandle(hMapFile); //
+	return TRUE;
+}
+
+
+//start a new process using a given command line
+int CreateProcessFromLine(TCHAR *command_line,bool newConsole)
 {
 	STARTUPINFO StartupInfo; //This is an [in] parameter
 	ZeroMemory(&StartupInfo, sizeof(StartupInfo));
@@ -46,9 +135,14 @@ int CreateProcessLine(TCHAR *command_line,bool newConsole)
 	ZeroMemory(&si, sizeof(si));
 	si.cb = sizeof(si);
 	ZeroMemory(&pi, sizeof(pi));
-	return CreateProcess(NULL, command_line, NULL, NULL, FALSE,newConsole? CREATE_NEW_CONSOLE:0, NULL, NULL, &si, &pi);
+	if (!CreateProcess(NULL, command_line, NULL, NULL, FALSE, CREATE_SUSPENDED | (newConsole ? CREATE_NEW_CONSOLE : 0), NULL, NULL, &si, &pi))
+		return 0;
+	return WriteDLLsToProcess(pi);
+	
+	
 }
 
+//Create the correct command line for starting the x64 file
 void createCommandLine(int argc,  _TCHAR* argv[], TCHAR *resBuffer, int resBufferLen) //create single line
 {
 	TCHAR folderBuffer[MAX_PATH];
@@ -69,6 +163,8 @@ void createCommandLine(int argc,  _TCHAR* argv[], TCHAR *resBuffer, int resBuffe
 	}
 }
 
+
+//make a file from a resource
 BOOL CopyResourceIntoFile(LPCWSTR ResourceName, LPTSTR  resID)
 {
 	TCHAR resFullName[MAX_PATH];
@@ -91,13 +187,21 @@ BOOL CopyResourceIntoFile(LPCWSTR ResourceName, LPTSTR  resID)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-
-	if (!IsElevated())
+		if (!IsElevated())
 	{
-		printf("This process needs to run as an admin!\nRun again please\n");
-		return 1;
+		printf("This process needs to run as an admin! Do you wish to continue? [y\\n]\n");
+		char c=getchar();
+		while (c != 'y' && c != 'Y' && c != 'n' && c != 'N')
+		{
+			if (c == '\n') continue;
+			printf("Enter a valid char! Do you wish to continue without admin privilages? [y\\n]\n");
+			c = getchar();
+
+		}
+		if(c=='n' || c=='N')
+			return 1;
 	}
-	if (isSystem64BitWow())
+		if (isSystem64BitWow())
 	{
 		TCHAR buffer[MAX_COMMANDLINE_LEN];
 		for (int i = 0; i < x64ResNum; i++)
@@ -111,11 +215,11 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 		}
 		createCommandLine(argc, argv, buffer, MAX_COMMANDLINE_LEN);
-		CreateProcessLine(buffer,false);
+		CreateProcessFromLine(buffer,false);
 		return 0;
 	}
-
-	if(PrepareContents(argc, argv))
-	LaunchDaemon();
+	BOOL InjectAll = FALSE;
+	if(PrepareContents(argc, argv,&InjectAll))
+	LaunchDaemon(InjectAll);
 	return 0;
 }

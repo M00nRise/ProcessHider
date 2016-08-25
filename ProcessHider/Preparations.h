@@ -20,7 +20,5 @@ extern ArgStruct argsToDLL;
 
 
 
-BOOL PrepareContents(int argc,TCHAR * argv[]);
-void getFolderFromPath(TCHAR *target);
-void getSelfFolder(TCHAR *target, int num_tchars);
+BOOL PrepareContents(int argc,TCHAR * argv[],PBOOL P_InjectALL);
 #endif

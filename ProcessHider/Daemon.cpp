@@ -13,11 +13,6 @@ BOOL isProcess64Bit(HANDLE hProcess)
 	return !res;
 #endif // 
 
-/*	BOOL res;
-	IsWow64Process(GetCurrentProcess(), &res);
-	if (!res) return FALSE;
-	IsWow64Process(hProcess, &res);
-	return !res;*/
 }
 
 BOOL wstrcmp_ignorecase(LPCWSTR a, LPCWSTR b) //easier to implement than use existing functions
@@ -72,22 +67,22 @@ void reactToProcess(DWORD pid, LPWSTR name)
 
 
 
-void startDaemonScan()
+void startDaemonScan(BOOL InjectALL)
 {
+	//ironicaly, it's the most reliable way to get processes list
 	PNtQueryFunc NtQuerySystemInformation = (PNtQueryFunc)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtQuerySystemInformation");
-
 	while (1)
 	{
-
+		
 		PSYSTEM_PROCESS_INFORMATION pspi = NULL;
 		ULONG info_length = 0;
 		NTSTATUS result = NtQuerySystemInformation(SystemProcessInformation, NULL, 0, &info_length);
+		//go through the results
 		pspi = (PSYSTEM_PROCESS_INFORMATION)malloc(info_length);
 		result = NtQuerySystemInformation(SystemProcessInformation, pspi, info_length, &info_length);
 		if (result <0) continue;
 		PSYSTEM_PROCESS_INFO pCurrent = NULL;
 		PSYSTEM_PROCESS_INFO pNext = (PSYSTEM_PROCESS_INFO)pspi;
-
 		do
 		{
 			pCurrent = pNext;
@@ -96,36 +91,13 @@ void startDaemonScan()
 				reactToProcess((DWORD) pCurrent->ProcessId, pCurrent->ImageName.Buffer);
 		} while (pCurrent->NextEntryOffset != 0);
 		free(pspi);
-		/*DWORD procIDsBuffer[MAX_PROCESSES];
-		DWORD size_returned;
-
-		EnumProcesses(procIDsBuffer, sizeof(procIDsBuffer), &size_returned);
-		int numProc = size_returned / sizeof(DWORD);
-		int i;
-		TCHAR strBuffer[MAX_PATH];
-		for (i = 0; i < numProc; i++)
-		{
-			DWORD curr_pid = (int)procIDsBuffer[i];
-			HANDLE Handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, TRUE, curr_pid);
-			GetModuleBaseName(Handle, NULL, strBuffer, MAX_PATH);
-			if ((Handle) && isInFrobProcList(strBuffer))
-			{
-				reactToProcess(curr_pid, strBuffer);
-			}
-			CloseHandle(Handle);
-		}*/
-
-
-
-
 		updateList();
 	}
 }
 
 
-void LaunchDaemon()
+void LaunchDaemon(BOOL InjectALL)
 {
-
 	printf("Daemon PID: %d\n", GetCurrentProcessId());
-	startDaemonScan();
+	startDaemonScan(InjectALL);
 }

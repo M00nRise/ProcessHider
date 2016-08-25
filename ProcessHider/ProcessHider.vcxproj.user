@@ -9,7 +9,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>-i 18848,3024,2704 -n "chrome.exe,svchost.exe,conhost.exe"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-g -i 18848,3024,2704 -n "chrome.exe,svchost.exe,conhost.exe"</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

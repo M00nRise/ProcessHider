@@ -8,7 +8,7 @@
 #define MAX_PROCESSES 1000
 #define TIME_TO_INJECT_SEC 0
 
-
+#define ERROR_PRINT(x) {printf("%s",x); return FALSE;}
 
 
 #endif

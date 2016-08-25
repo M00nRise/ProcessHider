@@ -23,8 +23,10 @@ $outputCFile=$PSScriptRoot.ToString()+"\Common\DLLs_hex.cpp"
 
 New-Item $outputCFile -ItemType file -Force | Out-Null
 '#include "..\Common\DLLs_hex.h"'|Out-File -Encoding utf8 -FilePath $outputCFile -Append
-'const BYTE x64PayloadByteArr[]={'+($x64PayloadHex.Split("-") -join "")+'};'|Out-File -Encoding utf8 -FilePath $outputCFile -Append
-'const int x64PayloadSize='+$x64PayloadLen+';'|Out-File -Encoding utf8 -FilePath $outputCFile -Append
-'const BYTE x86PayloadByteArr[]={'+($x86PayloadHex.Split("-") -join "")+'};'|Out-File -Encoding utf8 -FilePath $outputCFile -Append
-'const int x86PayloadSize='+$x86PayloadLen+';'|Out-File -Encoding utf8 -FilePath $outputCFile -Append
+'BYTE tmpx64PayloadByteArr[]={'+($x64PayloadHex.Split("-") -join "")+'};'|Out-File -Encoding utf8 -FilePath $outputCFile -Append
+'BYTE *x64PayloadByteArr=tmpx64PayloadByteArr;'|Out-File -Encoding utf8 -FilePath $outputCFile -Append
+'int x64PayloadSize='+$x64PayloadLen+';'|Out-File -Encoding utf8 -FilePath $outputCFile -Append
+'BYTE tmpx86PayloadByteArr[]={'+($x86PayloadHex.Split("-") -join "")+'};'|Out-File -Encoding utf8 -FilePath $outputCFile -Append
+'BYTE *x86PayloadByteArr=tmpx86PayloadByteArr;'|Out-File -Encoding utf8 -FilePath $outputCFile -Append
+'int x86PayloadSize='+$x86PayloadLen+';'|Out-File -Encoding utf8 -FilePath $outputCFile -Append
 "---------  Finished Building-DLLs script ---------"
